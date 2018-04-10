@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Violations Issued 2017</title>
+    <meta charset="utf-8" />
+	<link rel="stylesheet" href="leaflet.css" type="text/css" media="screen" />
+	<link rel="stylesheet" href="style2.css" type="text/css" media="screen" />	
+</head>
+<style>
+html,
+body {
+	height: 100%
+}
+
+#map {
+	height: 100%
+}
+
+.ui {
+	top: 10px;
+	left: 50px;
+	padding: 8px;
+	position: absolute;
+	background-color: #fff;
+	border: 2px solid #707070;
+	border-radius: 7px;
+	width: 300px;
+}
+</style>
+<body>
+	<div id="map">
+		<div id="ui-container" class="ui" style="z-index: 401">
+		
+			      <h4>DOB Violations Issued 2017</h4>
+				  <h5>Violation Type</h5>
+				  
+				  <span style="display:inline-block; background-color:#FF5500; padding:0px; margin:0px; height:13px; width:13px; overflow:hidden"><input type="checkbox" style="opacity:0.50;padding:0px;margin:0px" name="vio" class="regular-checkbox" value="boiler" id="boiler" checked="checked"/></span>
+					<label for="boiler"></label><span class="en">Boilers</span>
+				  <br/>
+				  
+				  <span style="display:inline-block; background-color:#42d4f4; padding:0px; margin:0px; height:13px; width:13px; overflow:hidden"><input type="checkbox" style="opacity:0.50;padding:0px;margin:0px" name="vio" class="regular-checkbox" value="constr" id="constr" /></span>
+					<label for="const"></label><span class="en">Construction</span>
+				  <br/>
+				  
+				  <span style="display:inline-block; background-color:#bcb92f; padding:0px; margin:0px; height:13px; width:13px; overflow:hidden"><input type="checkbox" style="opacity:0.50;padding:0px;margin:0px" name="vio" class="regular-checkbox" value="elev" id="elev" /></span>
+					<label for="elev"></label><span class="en">Elevators</span>
+				  <br/>
+				  
+				  <span style="display:inline-block; background-color:#777777; padding:0px; margin:0px; height:13px; width:13px; overflow:hidden"><input type="checkbox" style="opacity:0.50;padding:0px;margin:0px" name="vio" class="regular-checkbox" value="other" id="other"/></span>
+					<label for="other"></label><span class="en">Other</span>
+				  <br/>				
+		</div>
+	</div>
+
+	
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+	<script src="./js/leaflet.js"></script>
+	<script src="./js/leaflet.ajax.min.js"></script>
+	<script src="jquery-2.1.1.min.js"></script>
+	<script src="static/chroniton.js"></script>
+	<link href="static/chroniton.css" rel="stylesheet">
+	
+	<link href="build/nv.d3.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js" charset="utf-8"></script>
+    <script src="build/nv.d3.js"></script>
+	
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script>
+
+		var map = L.map('map').setView([40.757923, -73.957235], 13);
+		var toolserver = L.tileLayer('http://{s}.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png');
+		var stamen = L.tileLayer('http://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png', {attribution: '© <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'}).addTo(map); /*Stamen.TonerLite*/
+			
+		map.scrollWheelZoom.disable();
+
+		var BOILER = 0;
+			CONSTR = 0;
+			ELEV = 0;
+			OTHER = 0;
+					
+	function init() {
+		
+		$.getJSON("data/ViosIssued_Boilers.json")
+				.done(function(data) {
+					BOILER = L.geoJson(data, {
+						pointToLayer: function (feature, latlng) {
+					var prop = feature.properties;
+					var popupContent = "<u> ADDRESS </u> <br>" + 
+									"<b>" + prop.Address + ", " + prop.Borough_Na + "</b>" +
+									"<br> <u> BIN </u> <br> "+ "<b>"+prop.BIN_Number+"</b>" +
+									"<br> <u> VIOLATION TYPE </u> <br> "+ "<b>"+prop.Violatio_1+"</b>" +
+									"<br> <u> VIOLATION NUMBER </u> <br> "+ "<b>" +prop.Violatio_4+"</b>" +
+									"<br> <u> DISPOSITION DATE </u> <br> "+ "<b>" +prop.D_DATE+"</b>";
+						
+							return L.circleMarker (latlng, {
+								fillColor: "#FF5500",
+								weight: 0,
+								radius: 2,
+								fillOpacity: 0.7
+
+							}).on('click', function(e){
+								this.bindPopup(popupContent).openPopup();
+							})
+							<!-- .on('mouseover', function(e){ -->
+								<!-- this.openPopup(); -->
+								<!-- this.setStyle({color: "yellow"}); -->
+							<!-- }) -->
+							<!-- .on('mouseout', function(e){ -->
+								<!-- this.closePopup(); -->
+								<!-- this.setStyle({color: "#FF5500"}); -->
+							<!-- }); -->
+						}
+					}).addTo(map);
+
+				})
+				
+		$.getJSON("data/ViosIssued_Construction.json")
+				.done(function(data) {
+					CONSTR = L.geoJson(data, {
+						pointToLayer: function (feature, latlng) {
+					var prop = feature.properties;
+					var popupContent = "<u> ADDRESS </u> <br>" + 
+									"<b>" + prop.Address + ", " + prop.Borough_Na + "</b>" +
+									"<br> <u> BIN </u> <br> "+ "<b>"+prop.BIN_Number+"</b>" +
+									"<br> <u> VIOLATION TYPE </u> <br> "+ "<b>"+prop.Violatio_1+"</b>" +
+									"<br> <u> VIOLATION NUMBER </u> <br> "+ "<b>" +prop.Violatio_4+"</b>" +
+									"<br> <u> DISPOSITION DATE </u> <br> "+ "<b>" +prop.D_DATE+"</b>";
+						
+							return L.circleMarker (latlng, {
+								fillColor: "#42d4f4",
+								weight: 0,
+								radius: 2,
+								fillOpacity: 0.7
+
+							}).on('click', function(e){
+								this.bindPopup(popupContent).openPopup();
+							})
+							<!-- .on('mouseover', function(e){ -->
+								<!-- this.openPopup(); -->
+								<!-- this.setStyle({color: "yellow"}); -->
+							<!-- }) -->
+							<!-- .on('mouseout', function(e){ -->
+								<!-- this.closePopup(); -->
+								<!-- this.setStyle({color: "#FF5500"}); -->
+							<!-- }); -->
+						}
+					})//.addTo(map);
+
+				})
+				
+		$.getJSON("data/ViosIssued_Elevators.json")
+				.done(function(data) {
+					ELEV = L.geoJson(data, {
+						pointToLayer: function (feature, latlng) {
+					var prop = feature.properties;
+					var popupContent = "<u> ADDRESS </u> <br>" + 
+									"<b>" + prop.Address + ", " + prop.Borough_Na + "</b>" +
+									"<br> <u> BIN </u> <br> "+ "<b>"+prop.BIN_Number+"</b>" +
+									"<br> <u> VIOLATION TYPE </u> <br> "+ "<b>"+prop.Violatio_1+"</b>" +
+									"<br> <u> VIOLATION NUMBER </u> <br> "+ "<b>" +prop.Violatio_4+"</b>" +
+									"<br> <u> DISPOSITION DATE </u> <br> "+ "<b>" +prop.D_DATE+"</b>";
+						
+							return L.circleMarker (latlng, {
+								fillColor: "#bcb92f",
+								weight: 0,
+								radius: 2,
+								fillOpacity: 0.7
+
+							}).on('click', function(e){
+								this.bindPopup(popupContent).openPopup();
+							})
+							<!-- .on('mouseover', function(e){ -->
+								<!-- this.openPopup(); -->
+								<!-- this.setStyle({color: "yellow"}); -->
+							<!-- }) -->
+							<!-- .on('mouseout', function(e){ -->
+								<!-- this.closePopup(); -->
+								<!-- this.setStyle({color: "#FF5500"}); -->
+							<!-- }); -->
+						}
+					})//.addTo(map);
+
+				})
+				
+		$.getJSON("data/ViosIssued_Other.json")
+				.done(function(data) {
+					OTHER = L.geoJson(data, {
+						pointToLayer: function (feature, latlng) {
+					var prop = feature.properties;
+					var popupContent = "<u> ADDRESS </u> <br>" + 
+									"<b>" + prop.Address + ", " + prop.Borough_Na + "</b>" +
+									"<br> <u> BIN </u> <br> "+ "<b>"+prop.BIN_Number+"</b>" +
+									"<br> <u> VIOLATION TYPE </u> <br> "+ "<b>"+prop.Violatio_1+"</b>" +
+									"<br> <u> VIOLATION NUMBER </u> <br> "+ "<b>" +prop.Violatio_4+"</b>" +
+									"<br> <u> DISPOSITION DATE </u> <br> "+ "<b>" +prop.D_DATE+"</b>";
+						
+							return L.circleMarker (latlng, {
+								fillColor: "#777777",
+								weight: 0,
+								radius: 2,
+								fillOpacity: 0.5
+
+							}).on('click', function(e){
+								this.bindPopup(popupContent).openPopup();
+							})
+							<!-- .on('mouseover', function(e){ -->
+								<!-- this.openPopup(); -->
+								<!-- this.setStyle({color: "yellow"}); -->
+							<!-- }) -->
+							<!-- .on('mouseout', function(e){ -->
+								<!-- this.closePopup(); -->
+								<!-- this.setStyle({color: "#FF5500"}); -->
+							<!-- }); -->
+						}
+					})//.addTo(map);
+
+				})
+								
+		.fail(function() { alert("There has been a problem loading the data.")});
+	}	
+		
+	function initCheckboxes() {
+    var checkboxPermits = $('input.permit:checkbox'),
+          $boiler = $('#boiler'),
+		  $constr = $('#constr'),
+          $elev = $('#elev'),
+          $other = $('#other');
+
+		$boiler.change(function(){
+		  if ($boiler.is(':checked')){
+			map.addLayer(BOILER);
+		  } else {
+			map.removeLayer(BOILER);
+		  };
+		});
+		
+		$constr.change(function(){
+		  if ($constr.is(':checked')){
+			map.addLayer(CONSTR);
+		  } else {
+			map.removeLayer(CONSTR);
+		  };
+		});
+		
+		$elev.change(function(){
+		  if ($elev.is(':checked')){
+			map.addLayer(ELEV);
+		  } else {
+			map.removeLayer(ELEV);
+		  };
+		});
+		
+		$other.change(function(){
+		  if ($other.is(':checked')){
+			map.addLayer(OTHER);
+		  } else {
+			map.removeLayer(OTHER);
+		  };
+		});
+	}
+	
+	
+	window.onload = init(); initCheckboxes();
+	
+    </script>
+</body>
+</html>
