@@ -1,40 +1,89 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
+
 <head>
-    <title>Violations Issued 2017</title>
-    <meta charset="utf-8" />
-	<link rel="stylesheet" href="leaflet.css" type="text/css" media="screen" />
-	<link rel="stylesheet" href="style2.css" type="text/css" media="screen" />	
+  <title>Violations Issued 2017</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="leaflet.css" type="text/css" media="screen" />
+  
+  <style>
+	html,
+    body {
+      height: 100%;
+	  
+    }
+    
+    text {
+      fill: white;
+    }
+    svg {
+      position: relative;
+	  pointer-events: all;
+    }
+    .leaflet-marker-icon, .leaflet-marker-shadow, .leaflet-image-layer, .leaflet-pane > svg path, .leaflet-tile-container {
+				pointer-events: visible;
+				
+			}
+	.boilers {
+		fill: #FF5500;
+		fill-opacity: .5;
+	}
+	.construction {
+		fill: #42d4f4;
+		fill-opacity: .5;
+	}
+	.elevators {
+		fill: #bcb92f;
+		fill-opacity: .5;
+	}
+	.other {
+		fill: #e5e7ea;
+		fill-opacity: .5;	
+	}
+    #map {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      background-color: #333;
+	  pointer-events: all;
+    }
+	.ui {
+		top: 10px;
+		left: 50px;
+		padding: 8px;
+		position: absolute;
+		background-color: #fff;
+		border: 2px solid #707070;
+		border-radius: 7px;
+		width: 300px;
+	}
+	<!-- .hidden { -->
+		<!-- display: none; -->
+	<!-- } -->
+
+	div.tooltip {
+		color: #222;
+		background: #fff;
+		padding: .5em;
+		text-shadow: #f5f5f5 0 1px 0;
+		border-radius: 7px; 
+		box-shadow: 0px 0px 2px 0px #a6a6a6; 
+		opacity: 0.9; 
+		position: absolute;
+	}
+
+  </style>
+
 </head>
-<style>
-html,
-body {
-	height: 100%
-}
 
-#map {
-	height: 100%
-}
-
-.ui {
-	top: 10px;
-	left: 50px;
-	padding: 8px;
-	position: absolute;
-	background-color: #fff;
-	border: 2px solid #707070;
-	border-radius: 7px;
-	width: 300px;
-}
-</style>
 <body>
-	<div id="map">
+  <div id="map">
 		<div id="ui-container" class="ui" style="z-index: 401">
 		
 			      <h4>DOB Violations Issued 2017</h4>
 				  <h5>Violation Type</h5>
 				  
-				  <span style="display:inline-block; background-color:#FF5500; padding:0px; margin:0px; height:13px; width:13px; overflow:hidden"><input type="checkbox" style="opacity:0.50;padding:0px;margin:0px" name="vio" class="regular-checkbox" value="boiler" id="boiler" checked="checked"/></span>
+				  <span style="display:inline-block; background-color:#FF5500; padding:0px; margin:0px; height:13px; width:13px; overflow:hidden"><input type="checkbox" style="opacity:0.50;padding:0px;margin:0px" name="vio" class="regular-checkbox" value="boiler" id="boiler" checked="true"/></span>
 					<label for="boiler"></label><span class="en">Boilers</span>
 				  <br/>
 				  
@@ -46,224 +95,240 @@ body {
 					<label for="elev"></label><span class="en">Elevators</span>
 				  <br/>
 				  
-				  <span style="display:inline-block; background-color:#777777; padding:0px; margin:0px; height:13px; width:13px; overflow:hidden"><input type="checkbox" style="opacity:0.50;padding:0px;margin:0px" name="vio" class="regular-checkbox" value="other" id="other"/></span>
+				  <span style="display:inline-block; background-color:#e5e7ea; padding:0px; margin:0px; height:13px; width:13px; overflow:hidden"><input type="checkbox" style="opacity:0.50;padding:0px;margin:0px" name="vio" class="regular-checkbox" value="other" id="other" /></span>
 					<label for="other"></label><span class="en">Other</span>
 				  <br/>				
 		</div>
-	</div>
+  </div>
+    <!-- <div id="tooltip" class="tooltip" style="z-index: 401"></div> -->
 
-	
 	<script src="http://d3js.org/d3.v3.min.js"></script>
-	<script src="./js/leaflet.js"></script>
+	<script src="./leaflet/leaflet.js"></script>
 	<script src="./js/leaflet.ajax.min.js"></script>
 	<script src="jquery-2.1.1.min.js"></script>
 	<script src="static/chroniton.js"></script>
 	<link href="static/chroniton.css" rel="stylesheet">
-	
 	<link href="build/nv.d3.css" rel="stylesheet" type="text/css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js" charset="utf-8"></script>
-    <script src="build/nv.d3.js"></script>
-	
+	<script src="build/nv.d3.js"></script>
+
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-    <script>
+  <script>
 
-		var map = L.map('map').setView([40.757923, -73.957235], 13);
-		var toolserver = L.tileLayer('http://{s}.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png');
-		var stamen = L.tileLayer('http://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png', {attribution: '© <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'}).addTo(map); /*Stamen.TonerLite*/
-			
-		map.scrollWheelZoom.disable();
+	var leafletMap = L.map('map').setView([40.757923, -73.957235], 13);
+	L.tileLayer("http://{s}.sm.mapstack.stamen.com/(toner-lite,$fff[difference],$fff[@23],$fff[hsl-saturation@20])/{z}/{x}/{y}.png", {attribution: '© <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'}).addTo(leafletMap);
+	//var toolserver = L.tileLayer('http://{s}.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png');
+	//var stamen = L.tileLayer('http://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png', {attribution: '© <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'}).addTo(leafletMap); /*Stamen.TonerLite*/
 
-		var BOILER = 0;
-			CONSTR = 0;
-			ELEV = 0;
-			OTHER = 0;
-					
-	function init() {
-		
-		$.getJSON("data/ViosIssued_Boilers.json")
-				.done(function(data) {
-					BOILER = L.geoJson(data, {
-						pointToLayer: function (feature, latlng) {
-					var prop = feature.properties;
-					var popupContent = "<u> ADDRESS </u> <br>" + 
-									"<b>" + prop.Address + ", " + prop.Borough_Na + "</b>" +
-									"<br> <u> BIN </u> <br> "+ "<b>"+prop.BIN_Number+"</b>" +
-									"<br> <u> VIOLATION TYPE </u> <br> "+ "<b>"+prop.Violatio_1+"</b>" +
-									"<br> <u> VIOLATION NUMBER </u> <br> "+ "<b>" +prop.Violatio_4+"</b>" +
-									"<br> <u> DISPOSITION DATE </u> <br> "+ "<b>" +prop.D_DATE+"</b>";
-						
-							return L.circleMarker (latlng, {
-								fillColor: "#FF5500",
-								weight: 0,
-								radius: 2,
-								fillOpacity: 0.7
-
-							}).on('click', function(e){
-								this.bindPopup(popupContent).openPopup();
-							})
-							<!-- .on('mouseover', function(e){ -->
-								<!-- this.openPopup(); -->
-								<!-- this.setStyle({color: "yellow"}); -->
-							<!-- }) -->
-							<!-- .on('mouseout', function(e){ -->
-								<!-- this.closePopup(); -->
-								<!-- this.setStyle({color: "#FF5500"}); -->
-							<!-- }); -->
-						}
-					}).addTo(map);
-
-				})
+	function init() {			
+			var tooltip = d3.select('body').append('div')
+				//.style('z-index', '401')
+				.attr('class', 'tooltip');
 				
-		$.getJSON("data/ViosIssued_Construction.json")
-				.done(function(data) {
-					CONSTR = L.geoJson(data, {
-						pointToLayer: function (feature, latlng) {
-					var prop = feature.properties;
-					var popupContent = "<u> ADDRESS </u> <br>" + 
-									"<b>" + prop.Address + ", " + prop.Borough_Na + "</b>" +
-									"<br> <u> BIN </u> <br> "+ "<b>"+prop.BIN_Number+"</b>" +
-									"<br> <u> VIOLATION TYPE </u> <br> "+ "<b>"+prop.Violatio_1+"</b>" +
-									"<br> <u> VIOLATION NUMBER </u> <br> "+ "<b>" +prop.Violatio_4+"</b>" +
-									"<br> <u> DISPOSITION DATE </u> <br> "+ "<b>" +prop.D_DATE+"</b>";
-						
-							return L.circleMarker (latlng, {
-								fillColor: "#42d4f4",
-								weight: 0,
-								radius: 2,
-								fillOpacity: 0.7
-
-							}).on('click', function(e){
-								this.bindPopup(popupContent).openPopup();
-							})
-							<!-- .on('mouseover', function(e){ -->
-								<!-- this.openPopup(); -->
-								<!-- this.setStyle({color: "yellow"}); -->
-							<!-- }) -->
-							<!-- .on('mouseout', function(e){ -->
-								<!-- this.closePopup(); -->
-								<!-- this.setStyle({color: "#FF5500"}); -->
-							<!-- }); -->
-						}
-					})//.addTo(map);
-
-				})
+			<!-- var width = 1060, -->
+				<!-- height = 600; -->
 				
-		$.getJSON("data/ViosIssued_Elevators.json")
-				.done(function(data) {
-					ELEV = L.geoJson(data, {
-						pointToLayer: function (feature, latlng) {
-					var prop = feature.properties;
-					var popupContent = "<u> ADDRESS </u> <br>" + 
-									"<b>" + prop.Address + ", " + prop.Borough_Na + "</b>" +
-									"<br> <u> BIN </u> <br> "+ "<b>"+prop.BIN_Number+"</b>" +
-									"<br> <u> VIOLATION TYPE </u> <br> "+ "<b>"+prop.Violatio_1+"</b>" +
-									"<br> <u> VIOLATION NUMBER </u> <br> "+ "<b>" +prop.Violatio_4+"</b>" +
-									"<br> <u> DISPOSITION DATE </u> <br> "+ "<b>" +prop.D_DATE+"</b>";
-						
-							return L.circleMarker (latlng, {
-								fillColor: "#bcb92f",
-								weight: 0,
-								radius: 2,
-								fillOpacity: 0.7
+			var width = $("#map").width(),
+				height = $("#map").height();
+	
+			d3.json('data/ViosIssued_2017_v2.json', function(error, incidents) {
+			  var VIO = incidents;
+			  var svg = d3.select(leafletMap.getPanes().overlayPane).append("svg");
+			  var g = svg.append("g").attr("class", "leaflet-zoom-hide");
 
-							}).on('click', function(e){
-								this.bindPopup(popupContent).openPopup();
-							})
-							<!-- .on('mouseover', function(e){ -->
-								<!-- this.openPopup(); -->
-								<!-- this.setStyle({color: "yellow"}); -->
-							<!-- }) -->
-							<!-- .on('mouseout', function(e){ -->
-								<!-- this.closePopup(); -->
-								<!-- this.setStyle({color: "#FF5500"}); -->
-							<!-- }); -->
-						}
-					})//.addTo(map);
+			  // Use Leaflet to implement a D3 geometric transformation.
+			  function projectPoint(x, y) {
+				var point = leafletMap.latLngToLayerPoint(new L.LatLng(y, x));
+				this.stream.point(point.x, point.y);
+			  }
 
-				})
+			  var transform = d3.geo.transform({
+				point: projectPoint
+			  });
+			  var path = d3.geo.path().projection(transform);
+			  leafletMap.on('moveend', mapmove);
+
+			  redrawSubset(VIO.features)
+
+			  function redrawSubset(subset) {
+				path.pointRadius(3); // * scale);
+
+				var bounds = path.bounds({
+				  type: "FeatureCollection",
+				  features: subset
+				});
+				var topLeft = bounds[0];
+				var bottomRight = bounds[1];
+
+				svg.attr("width", bottomRight[0] - topLeft[0])
+				  .attr("height", bottomRight[1] - topLeft[1])
+				  .style("left", topLeft[0] + "px")
+				  .style("top", topLeft[1] + "px");
+
+				g.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+
+				var vio = g.selectAll("path")
+				  .data(subset, function(d) {
+					return d.geometry.coordinates;
+				  });
+				  
+
+				vio.enter().append("path");
+				vio.attr("d", path).attr("class", function(d){
+					if (d.properties.VioCat == "Boilers"){
+						return "boilers";
+					} else if (d.properties.VioCat == "Construction"){
+						return "construction";
+					} else if (d.properties.VioCat == "Elevators"){
+						return "elevators";
+					} 
+						return "other";
+				});
 				
-		$.getJSON("data/ViosIssued_Other.json")
-				.done(function(data) {
-					OTHER = L.geoJson(data, {
-						pointToLayer: function (feature, latlng) {
-					var prop = feature.properties;
-					var popupContent = "<u> ADDRESS </u> <br>" + 
-									"<b>" + prop.Address + ", " + prop.Borough_Na + "</b>" +
-									"<br> <u> BIN </u> <br> "+ "<b>"+prop.BIN_Number+"</b>" +
-									"<br> <u> VIOLATION TYPE </u> <br> "+ "<b>"+prop.Violatio_1+"</b>" +
-									"<br> <u> VIOLATION NUMBER </u> <br> "+ "<b>" +prop.Violatio_4+"</b>" +
-									"<br> <u> DISPOSITION DATE </u> <br> "+ "<b>" +prop.D_DATE+"</b>";
-						
-							return L.circleMarker (latlng, {
-								fillColor: "#777777",
-								weight: 0,
-								radius: 2,
-								fillOpacity: 0.5
-
-							}).on('click', function(e){
-								this.bindPopup(popupContent).openPopup();
-							})
-							<!-- .on('mouseover', function(e){ -->
-								<!-- this.openPopup(); -->
-								<!-- this.setStyle({color: "yellow"}); -->
-							<!-- }) -->
-							<!-- .on('mouseout', function(e){ -->
-								<!-- this.closePopup(); -->
-								<!-- this.setStyle({color: "#FF5500"}); -->
-							<!-- }); -->
-						}
-					})//.addTo(map);
-
-				})
 								
-		.fail(function() { alert("There has been a problem loading the data.")});
-	}	
-		
-	function initCheckboxes() {
-    var checkboxPermits = $('input.permit:checkbox'),
-          $boiler = $('#boiler'),
-		  $constr = $('#constr'),
-          $elev = $('#elev'),
-          $other = $('#other');
+				vio.on("click", function(d){
+					showhideOther(d);					
+					tooltip.html(
+								'BIN: ' + d.properties.BIN_Number + '</br>' +
+								'ADDRESS: '+ d.properties.Address + ', ' + (d.properties.Borough_Na).toUpperCase() + '</br>' +
+								'VIOLATION TYPE: ' + d.properties.Violatio_1.toUpperCase() + '</br>' +
+								'VIOLATION NUMBER: ' + d.properties.Violatio_4.toUpperCase() + '</br>' +
+								'DISPOSITION DATE: ' + d.properties.DateTxt
+							)
+					        if (d3.event.pageX > (width - 200)) {
+							   tooltip.style("left", (d3.event.pageX - 350) + "px");
+						   } else {
+							   tooltip.style("left", (d3.event.pageX + 20) + "px")
+									.style("top", (d3.event.pageY -30) + "px");
+						   }
+						   if (d3.event.pageY > (height - 150)) {
+							   tooltip.style("top", (d3.event.pageY -100) + "px");
+						   } else {
+							   tooltip.style("top", (d3.event.pageY -30) + "px");
+						   }
 
-		$boiler.change(function(){
-		  if ($boiler.is(':checked')){
-			map.addLayer(BOILER);
-		  } else {
-			map.removeLayer(BOILER);
-		  };
-		});
+				})
+					.on("mousemove", function(d){
+						if(document.getElementById("other").checked == true){
+							$(this).attr("style", "cursor: pointer; stroke: #eef442; stroke-width: 2px; fill-opacity: .7;");
+						} else if(document.getElementById("boiler").checked == true){
+							$(this).attr("style", "cursor: pointer; stroke: #eef442; stroke-width: 2px; fill-opacity: .7;");
+						} else if(document.getElementById("constr").checked == true){
+							$(this).attr("style", "cursor: pointer; stroke: #eef442; stroke-width: 2px; fill-opacity: .7;");
+						} else if(document.getElementById("elev").checked == true){
+							$(this).attr("style", "cursor: pointer; stroke: #eef442; stroke-width: 2px; fill-opacity: .7;");
+						}
+						else {
+							$(this).attr("style", "cursor: pan;");
+						};
+						//return tooltip.style("top", (d3.event.pageY-10)+"px").style("left", (d3.event.pageX+10)+"px");
+						
+					})
+					<!-- .on("mouseover", function(d){ -->
+					        <!-- if (d3.event.pageX > (width - 200)) { -->
+							   <!-- tooltip.style("left", (d3.event.pageX - 210) + "px"); -->
+						   <!-- } else { -->
+							   <!-- tooltip.style("left", (d3.event.pageX + 20) + "px") -->
+									<!-- .style("top", (d3.event.pageY -30) + "px"); -->
+						   <!-- } -->
+						   <!-- if (d3.event.pageY > (height - 150)) { -->
+							   <!-- tooltip.style("top", (d3.event.pageY -100) + "px"); -->
+						   <!-- } else { -->
+							   <!-- tooltip.style("top", (d3.event.pageY -30) + "px"); -->
+						   <!-- } -->
+					<!-- }) -->
+					.on("mouseout", function(){
+						$(this).attr("style", "stroke-width: 0px; fill-opacity: .5;");
+						return tooltip.style("visibility", "hidden");
+					});
+
+				  function showhideOther(d){
+					if(document.getElementById("boiler").checked == true){
+						return tooltip.style("visibility", "visible");	
+					} else if (document.getElementById("constr").checked == true){
+						return tooltip.style("visibility", "visible");
+					} else if (document.getElementById("elev").checked == true){
+						return tooltip.style("visibility", "visible");
+					} else if (document.getElementById("other").checked == true){
+						return tooltip.style("visibility", "visible");
+					}
+					return tooltip.style("visibility", "hidden");
+				  }
+			  }
+
+			  //d3.selectAll(".boilers").style("display", "none");
+			  d3.selectAll(".construction").style("display", "none");
+			  d3.selectAll(".elevators").style("display", "none");
+			  d3.selectAll(".other").style("display", "none");
+
+			  	  
+
+			  
+			  function mapmove(e) {
+				if (otherCheckbox.checked){
+				//remove all points
+				d3.selectAll(".vio").remove();
+				redrawSubset(VIO.features);
+				} else {
+					redrawSubset(VIO.features);
+				}
+			  }
+			});
 		
-		$constr.change(function(){
-		  if ($constr.is(':checked')){
-			map.addLayer(CONSTR);
-		  } else {
-			map.removeLayer(CONSTR);
-		  };
-		});
-		
-		$elev.change(function(){
-		  if ($elev.is(':checked')){
-			map.addLayer(ELEV);
-		  } else {
-			map.removeLayer(ELEV);
-		  };
-		});
-		
-		$other.change(function(){
-		  if ($other.is(':checked')){
-			map.addLayer(OTHER);
-		  } else {
-			map.removeLayer(OTHER);
-		  };
-		});
 	}
+
+	var boilerCheckbox = document.querySelector('input[id="boiler"]');
+		constructionCheckbox = document.querySelector('input[id="constr"]');
+		elevatorCheckbox = document.querySelector('input[id="elev"]');
+		otherCheckbox = document.querySelector('input[id="other"]');
+
+	boilerCheckbox.onchange = function(){
+		if(this.checked){
+			d3.selectAll(".boilers").style("display", "block");
+		} else {
+			d3.selectAll(".boilers").style("display", "none");
+		}
+	};	
+	constructionCheckbox.onchange = function(){
+		if(this.checked){
+			d3.selectAll(".construction").style("display", "block");
+		} else {
+			d3.selectAll(".construction").style("display", "none");
+		}
+	};
+	elevatorCheckbox.onchange = function(){
+		if(this.checked){
+			d3.selectAll(".elevators").filter(function(d) {
+				return d.properties.VioCat == "Elevators";
+			})
+			.style("display", "block");	
+
+		} else {
+			d3.selectAll(".elevators").filter(function(d) {
+				return d.properties.VioCat == "Elevators";
+			})
+			.style("display", "none");
+						
+		}
+	};
+	otherCheckbox.onchange = function(){
+		if(this.checked){
+			d3.selectAll(".other").filter(function(d) {
+				return d.properties.VioCat == "Other";
+			})
+			.style("display", "block");
+		} else {
+			d3.selectAll(".other").filter(function(d) {
+				return d.properties.VioCat == "Other";
+			})
+			.style("display", "none");
+
+		}
+	};
 	
-	
-	window.onload = init(); initCheckboxes();
-	
-    </script>
+	window.onload = init();
+  </script>
 </body>
+
 </html>
